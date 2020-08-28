@@ -1,19 +1,17 @@
 import telebot
 
-token = open('token.txt').read()
-bot = telebot.TeleBot(token)
-state = ''
-quotation = ''
-character = ''
-print(state)
-def name(symbol, line):
-    return line[symbol:(line[symbol::].find(' '))]
+def filter_lower_words(capitalize_list, lower_words):
+    """Возращает только те слова из capitalize_list, которых в маленьком регистве нет среди lower_words"""
+    return {word for word in capitalize_list if word.lower() not in lower_words}
 
-def string_upper(line):
-    uppers = [l for l in range(len(line)) if line[l].isupper()]
-    return uppers
+def keep_alpha(line):
+    return ''.join(c if c.isalpha() else ' ' for c in line)
 
-def search_qoutation(quotation, file_name): 
+def capitalize_words(line):
+    """Возвращает список заглавных слов из строки line, в которой нет знаков пунктуации, длиной больше 1 буквы."""
+    return {word for word in line.split() if word == word.capitalize() and len(word) > 1}
+
+def search_qoutation(quotation, file_name):
     """получает цитату и файл с книжкой, возвращает список абзацев с данной цитатой"""
     paragraph = []
     for line in open(file_name, encoding="utf-8"):
@@ -21,6 +19,10 @@ def search_qoutation(quotation, file_name):
         if number_quotation != -1:
             paragraph.append(line)
     return paragraph
+
+token = open('token.txt').read()
+bot = telebot.TeleBot(token)
+
 @bot.message_handler(commands=['start'])
 def start_message(message):
     bot.send_message(message.chat.id, 'Привет, ты написал мне /start \n Вот какие команды я могу исполнять: \n /quotation - найти имя персонажа и главу в книге по введенной Вами цитате. \n /character - выделить как можно больше цитат персонажа в заданной главе.')
@@ -59,16 +61,25 @@ def send_text(message):
         bot.send_message(message.chat.id, 'Пока, хорошего дня!')
     elif state == 'quotation':
         quotation = message
-        text = open('war-peace.txt', encoding="utf-8").read()
+        text = open('example.txt', encoding="utf-8").read()
         #print(text.lower().find(message.text.lower()))
     elif state == 'character':
         character = message
-        text = open('war-peace.txt', encoding="utf-8").read()
+        text = open('example.txt', encoding="utf-8").read()
+
+state = ''
+character = ''
+
+def test():
+    file_name = 'example.txt'
+    text = open(file_name, encoding="utf-8").read()
+    lower_words = {word for word in keep_alpha(text).split() if word.islower()}
+    quotation = 'Что́ я думаю? я слушал тебя.'
+    print(search_qoutation(quotation, file_name))
+    for line in search_qoutation(quotation, file_name):
+        capitalize_list = capitalize_words(keep_alpha(line))
+        print(capitalize_list - filter_lower_words(capitalize_list, lower_words), capitalize_list, filter_lower_words(capitalize_list, lower_words))
+
 if __name__ == '__main__':
-    quotation = 'Надо жить, надо любить, надо верить'
-    print(search_qoutation(quotation, 'war-peace.txt'))
-    for line in search_qoutation(quotation, 'war-peace.txt'):
-        print(string_upper(line))
-        for symbol in string_upper(line):
-            print(name(symbol, line))
-#bot.polling()
+    #bot.polling()
+    test()
