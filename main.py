@@ -6,6 +6,13 @@ state = ''
 quotation = ''
 character = ''
 print(state)
+def name(symbol, line):
+    return line[symbol:(line[symbol::].find(' '))]
+
+def string_upper(line):
+    uppers = [l for l in range(len(line)) if line[l].isupper()]
+    return uppers
+
 def search_qoutation(quotation, file_name): 
     """получает цитату и файл с книжкой, возвращает список абзацев с данной цитатой"""
     paragraph = []
@@ -58,6 +65,10 @@ def send_text(message):
         character = message
         text = open('war-peace.txt', encoding="utf-8").read()
 if __name__ == '__main__':
-    quotation = 'до свидания'
+    quotation = 'Надо жить, надо любить, надо верить'
     print(search_qoutation(quotation, 'war-peace.txt'))
+    for line in search_qoutation(quotation, 'war-peace.txt'):
+        print(string_upper(line))
+        for symbol in string_upper(line):
+            print(name(symbol, line))
 #bot.polling()
