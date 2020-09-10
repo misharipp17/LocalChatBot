@@ -1,21 +1,65 @@
 import telebot
+import re
+
+def offset(text):
+    """Возвращает список смещений, которые возникают из-за удаления из строки знаков пунктуации, для каждого символа и саму строку только из букв и одинарных пробелов.
+    offset('— Ну,   хорошо') -> ' Ну хорошо', [1, 1, 1, 2, 4, 4, 4, 4, 4, 4]"""
+    result = []
+    n = 0
+    for symbol in range(len(text)):
+        if text[symbol].isalpha() == False and text[symbol] != ' ':
+            n += 1
+        elif text[symbol].isalpha() == False and text[symbol] == ' ':
+            result.append(n)
+            m = 1
+            while True:
+                if text[symbol + m] == ' ':
+                    m += 1
+                    n += 1
+                else:
+                    break
+        if text[symbol].isalpha():
+            result.append(n)
+    return result
+def search_directspeech(line):
+    """Возвращает прямую речь из абзаца."""
+    word = r'\b\w+\b'
+    word_punct = word + r'\S?'
+    sentence = word_punct + r'(?:\s*' + word_punct + ')*'
+    direct = sentence
+    author = sentence
+    end = '[.?!]'
+    comma_end = '[.?!,]'
+    template_author0 = direct + '—' + '(' + author + ')' + end
+    template_author1 = '(' + author + ')' + ":" + direct + end
+    template_author2 = direct + '—' + '(' + author + ')' + comma_end + '—' + direct
+    template_author3 = '— ' + direct + ' — ' + '(' + author + ')' + end
+    template_direct0 = '(' + direct + ')' + '—' + author + end
+    template_direct1 =author + ":" + '(' + direct + ')' + end
+    template_direct2 = '(' + direct + ')' + '—' + author + comma_end + '—' + direct
+    template_direct3 = '— ' + '(' + direct + ')' + ' — ' + author + end
+    result_author = re.findall(template_author3, line) + re.findall(template_author2, line) + re.findall(template_author1, line) + re.findall(template_author0, line)
+    result_direct = re.findall(template_direct3, line) + re.findall(template_direct2, line) + re.findall(template_direct1, line) + re.findall(template_direct0, line)
+    return result_author, result_direct
 
 def filter_lower_words(capitalize_list, lower_words):
-    """Возращает только те слова из capitalize_list, которых в маленьком регистве нет среди lower_words"""
-    return {word for word in capitalize_list if word.lower() not in lower_words}
+    """Возращает только те слова из capitalize_list, которых в маленьком регистве нет среди lower_words."""
+    return [word for word in capitalize_list if word.lower() not in lower_words]
 
 def keep_alpha(line):
-    return ''.join(c if c.isalpha() else ' ' for c in line)
+    line = line.translate(str.maketrans('','',chr(769)))
+    line = ''.join(c if c.isalpha() else ' ' for c in line)
+    return ' '.join(line.split())
 
 def capitalize_words(line):
     """Возвращает список заглавных слов из строки line, в которой нет знаков пунктуации, длиной больше 1 буквы."""
-    return {word for word in line.split() if word == word.capitalize() and len(word) > 1}
+    return [word for word in line.split() if word == word.capitalize() and len(word) > 1]
 
 def search_qoutation(quotation, file_name):
-    """получает цитату и файл с книжкой, возвращает список абзацев с данной цитатой"""
+    """Получает цитату и файл с книжкой, возвращает список абзацев с данной цитатой."""
     paragraph = []
     for line in open(file_name, encoding="utf-8"):
-        number_quotation = line.lower().find(quotation.lower())
+        number_quotation = line.lower().find(str(quotation).lower())
         if number_quotation != -1:
             paragraph.append(line)
     return paragraph
@@ -31,7 +75,7 @@ def start_message(message):
 def start_quotation(message):
     global state
     state = 'quotation'
-    bot.send_message(message.chat.id, 'Напишите Вашу цитату и, возможно, название книги.')
+    bot.send_message(message.chat.id, 'Напишите Вашу цитату и, возможно, название книги. Вводите цитату со как в оригинале(со знаками препинания и заглавными буквами)')
 
 @bot.message_handler(commands=['character'])
 def start_character(message):
@@ -39,17 +83,15 @@ def start_character(message):
     state = 'character'
     bot.send_message(message.chat.id, 'Напишите персонажа, и главу, и ,возможно, название книги.')
 
-@bot.message_handler(func=lambda message: message.document.mime_type == 'text/plain', content_types=['document'])
+@bot.message_handler(content_types=['document'])
 def handle_text_doc(message):
     if state == 'quotation':
         document_id = message.document.file_id
         file_id_info = bot.get_file(document_id)
         downloaded_file = bot.download_file(file_id_info.file_path)
-        src = message.document.file_name
-        with open(src, 'wb') as new_file:
+        file_name = message.document.file_name
+        with open(file_name, 'wb') as new_file:
             new_file.write(downloaded_file)
-        paragraphs = search_qoutation(qoutation, src)
-    
     else:
         bot.send_message(message.chat.id, 'Извините, но Вы прислали это не вовремя.')
 
@@ -60,11 +102,30 @@ def send_text(message):
     elif message.text.lower() == 'пока':
         bot.send_message(message.chat.id, 'Пока, хорошего дня!')
     elif state == 'quotation':
-        quotation = message
-        text = open('example.txt', encoding="utf-8").read()
-        #print(text.lower().find(message.text.lower()))
+        bot.send_message(message.chat.id, 'Вот возможные абзацы с этой цитатой и ее авторы:')
+        file_name = 'example.txt'
+        text = open(file_name, encoding="utf-8").read()
+        lower_words = {word for word in keep_alpha(text).split() if word.islower()}
+        quotation = message.text
+        quotation_author = ''
+        lines_with_quotation = search_qoutation(quotation, file_name)
+        if len(lines_with_quotation) == 0:
+            bot.send_message(message.chat.id, 'Цитата не найдена, дополните или исправите цитату')
+        for line in lines_with_quotation:
+            potential_authors = []
+            result_author, result_direct = search_directspeech(line)
+            for sentence in range(len(result_direct)):
+                if result_direct[sentence].find(quotation) != -1:
+                    quotation_author = result_author[sentence]
+            capitalize_list = capitalize_words(keep_alpha(quotation_author))
+            potential_authors =filter_lower_words(capitalize_list, lower_words)
+            bot.send_message(message.chat.id, line)
+            try:
+                bot.send_message(message.chat.id, potential_authors[0])
+            except:
+                bot.send_message(message.chat.id, 'Автор не найден, дополните или исправите цитату')
+        bot.send_message(message.chat.id, 'Есть ли еще цитаты для меня?')
     elif state == 'character':
-        character = message
         text = open('example.txt', encoding="utf-8").read()
 
 state = ''
@@ -74,12 +135,25 @@ def test():
     file_name = 'example.txt'
     text = open(file_name, encoding="utf-8").read()
     lower_words = {word for word in keep_alpha(text).split() if word.islower()}
-    quotation = 'Что́ я думаю? я слушал тебя.'
+    quotation = 'В будущую жизнь?'
+    quotation_author = ''
     print(search_qoutation(quotation, file_name))
-    for line in search_qoutation(quotation, file_name):
-        capitalize_list = capitalize_words(keep_alpha(line))
-        print(capitalize_list - filter_lower_words(capitalize_list, lower_words), capitalize_list, filter_lower_words(capitalize_list, lower_words))
+    lines_with_quotation = search_qoutation(quotation, file_name)
+    for line in lines_with_quotation:
+        potential_authors = []
+        result_author, result_direct = search_directspeech(line)
+        for sentence in range(len(result_direct)):
+            if result_direct[sentence].find(quotation) != -1:
+                quotation_author = result_author[sentence]
+        capitalize_list = capitalize_words(keep_alpha(quotation_author))
+        potential_authors = filter_lower_words(capitalize_list, lower_words)
+        try:
+            print(potential_authors)
+        except:
+            continue
 
 if __name__ == '__main__':
-    #bot.polling()
+    bot.polling()
+    #print(offset('—Ну,   хорошо'))
     test()
+
