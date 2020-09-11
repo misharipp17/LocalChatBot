@@ -1,26 +1,19 @@
 import telebot
 import re
 
-def offset(text):
+def get_offset(text):
     """Возвращает список смещений, которые возникают из-за удаления из строки знаков пунктуации, для каждого символа и саму строку только из букв и одинарных пробелов.
     offset('— Ну,   хорошо') -> ' Ну хорошо', [1, 1, 1, 2, 4, 4, 4, 4, 4, 4]"""
     result = []
-    n = 0
-    for symbol in range(len(text)):
-        if text[symbol].isalpha() == False and text[symbol] != ' ':
-            n += 1
-        elif text[symbol].isalpha() == False and text[symbol] == ' ':
-            result.append(n)
-            m = 1
-            while True:
-                if text[symbol + m] == ' ':
-                    m += 1
-                    n += 1
-                else:
-                    break
-        if text[symbol].isalpha():
-            result.append(n)
-    return result
+    line_result = ''
+    offset = 0
+    for i in range(len(text)):
+        if text[i].isalpha() or (text[i] == ' ' and (i == 0 or text[i - 1] != ' ')):
+            result.append(offset)
+            line_result += text[i]
+        else:
+            offset += 1
+    return line_result, result
 def search_directspeech(line):
     """Возвращает прямую речь из абзаца."""
     word = r'\b\w+\b'
@@ -34,12 +27,15 @@ def search_directspeech(line):
     template_author1 = '(' + author + ')' + ":" + direct + end
     template_author2 = direct + '—' + '(' + author + ')' + comma_end + '—' + direct
     template_author3 = '— ' + direct + ' — ' + '(' + author + ')' + end
+    template_author4 = '— ' + direct + ' — ' + author + comma_end + ' — ' + '(' + direct + ')' + ' — ' + '(' + author + ')' + end
     template_direct0 = '(' + direct + ')' + '—' + author + end
     template_direct1 =author + ":" + '(' + direct + ')' + end
     template_direct2 = '(' + direct + ')' + '—' + author + comma_end + '—' + direct
     template_direct3 = '— ' + '(' + direct + ')' + ' — ' + author + end
-    result_author = re.findall(template_author3, line) + re.findall(template_author2, line) + re.findall(template_author1, line) + re.findall(template_author0, line)
-    result_direct = re.findall(template_direct3, line) + re.findall(template_direct2, line) + re.findall(template_direct1, line) + re.findall(template_direct0, line)
+    template_direct4 = '— ' + '(' + direct + ')' + ' — ' + author + comma_end + ' — ' +'(' + direct + ')' + ' — ' + author + end
+    '''ошибка с кортежем'''
+    result_author = re.findall(template_author3, line) + re.findall(template_author2, line) + re.findall(template_author1, line) + re.findall(template_author0, line) + re.findall(template_author4, line)
+    result_direct = re.findall(template_direct3, line) + re.findall(template_direct2, line) + re.findall(template_direct1, line) + re.findall(template_direct0, line) + re.findall(template_direct4, line)
     return result_author, result_direct
 
 def filter_lower_words(capitalize_list, lower_words):
@@ -49,7 +45,9 @@ def filter_lower_words(capitalize_list, lower_words):
 def keep_alpha(line):
     line = line.translate(str.maketrans('','',chr(769)))
     line = ''.join(c if c.isalpha() else ' ' for c in line)
-    return ' '.join(line.split())
+    while '  ' in line:
+        line = line.replace('  ', ' ')
+    return line
 
 def capitalize_words(line):
     """Возвращает список заглавных слов из строки line, в которой нет знаков пунктуации, длиной больше 1 буквы."""
@@ -90,7 +88,7 @@ def handle_text_doc(message):
         file_id_info = bot.get_file(document_id)
         downloaded_file = bot.download_file(file_id_info.file_path)
         file_name = message.document.file_name
-        with open(file_name, 'wb') as new_file:
+        with open('downloaded_books/' + file_name, 'wb') as new_file:
             new_file.write(downloaded_file)
     else:
         bot.send_message(message.chat.id, 'Извините, но Вы прислали это не вовремя.')
@@ -120,10 +118,14 @@ def send_text(message):
             capitalize_list = capitalize_words(keep_alpha(quotation_author))
             potential_authors =filter_lower_words(capitalize_list, lower_words)
             bot.send_message(message.chat.id, line)
-            try:
+            if len(potential_authors) != 0:
                 bot.send_message(message.chat.id, potential_authors[0])
-            except:
-                bot.send_message(message.chat.id, 'Автор не найден, дополните или исправите цитату')
+            else:
+                while len(potential_authors) == 0:
+                    previous_paragraph = list(open(file_name, encoding="utf-8"))[list(open(file_name, encoding="utf-8")).index(line) - 1]
+                    previous_capitalize_list = capitalize_words(keep_alpha(previous_paragraph))
+                    potential_authors = filter_lower_words(previous_capitalize_list, lower_words)
+                bot.send_message(message.chat.id, potential_authors[- 1])
         bot.send_message(message.chat.id, 'Есть ли еще цитаты для меня?')
     elif state == 'character':
         text = open('example.txt', encoding="utf-8").read()
@@ -153,7 +155,6 @@ def test():
             continue
 
 if __name__ == '__main__':
-    bot.polling()
-    #print(offset('—Ну,   хорошо'))
-    test()
+    #bot.polling()
+    print(get_offset('— Ну,   хорошо'))
 
