@@ -27,15 +27,14 @@ def search_directspeech(line):
     template_author1 = '(' + author + ')' + ":" + direct + end
     template_author2 = direct + '—' + '(' + author + ')' + comma_end + '—' + direct
     template_author3 = '— ' + direct + ' — ' + '(' + author + ')' + end
-    template_author4 = '— ' + direct + ' — ' + author + comma_end + ' — ' + '(' + direct + ')' + ' — ' + '(' + author + ')' + end
+    #template_author4 = '— ' + direct + ' — ' + author + comma_end + ' — ' + '(' + direct + ')' + ' — ' + '(' + author + ')' + end
     template_direct0 = '(' + direct + ')' + '—' + author + end
     template_direct1 =author + ":" + '(' + direct + ')' + end
     template_direct2 = '(' + direct + ')' + '—' + author + comma_end + '—' + direct
     template_direct3 = '— ' + '(' + direct + ')' + ' — ' + author + end
-    template_direct4 = '— ' + '(' + direct + ')' + ' — ' + author + comma_end + ' — ' +'(' + direct + ')' + ' — ' + author + end
-    '''ошибка с кортежем'''
-    result_author = re.findall(template_author3, line) + re.findall(template_author2, line) + re.findall(template_author1, line) + re.findall(template_author0, line) + re.findall(template_author4, line)
-    result_direct = re.findall(template_direct3, line) + re.findall(template_direct2, line) + re.findall(template_direct1, line) + re.findall(template_direct0, line) + re.findall(template_direct4, line)
+    #template_direct4 = '— ' + '(' + direct + ')' + ' — ' + author + comma_end + ' — ' +'(' + direct + ')' + ' — ' + author + end
+    result_author = re.findall(template_author3, line) + re.findall(template_author2, line) + re.findall(template_author1, line) + re.findall(template_author0, line)
+    result_direct = re.findall(template_direct3, line) + re.findall(template_direct2, line) + re.findall(template_direct1, line) + re.findall(template_direct0, line)
     return result_author, result_direct
 
 def filter_lower_words(capitalize_list, lower_words):
@@ -56,7 +55,7 @@ def capitalize_words(line):
 def search_qoutation(quotation, file_name):
     """Получает цитату и файл с книжкой, возвращает список абзацев с данной цитатой."""
     paragraph = []
-    for line in open(file_name, encoding="utf-8"):
+    for line in open("downloaded_books/" + file_name, encoding="utf-8"):
         number_quotation = line.lower().find(str(quotation).lower())
         if number_quotation != -1:
             paragraph.append(line)
@@ -90,6 +89,7 @@ def handle_text_doc(message):
         file_name = message.document.file_name
         with open('downloaded_books/' + file_name, 'wb') as new_file:
             new_file.write(downloaded_file)
+        bot.send_message(message.chat.id, 'Я загрузил вашу книгу, можете снова прислать Вашу цитату.')
     else:
         bot.send_message(message.chat.id, 'Извините, но Вы прислали это не вовремя.')
 
@@ -100,42 +100,51 @@ def send_text(message):
     elif message.text.lower() == 'пока':
         bot.send_message(message.chat.id, 'Пока, хорошего дня!')
     elif state == 'quotation':
-        bot.send_message(message.chat.id, 'Вот возможные абзацы с этой цитатой и ее авторы:')
         file_name = 'example.txt'
-        text = open(file_name, encoding="utf-8").read()
-        lower_words = {word for word in keep_alpha(text).split() if word.islower()}
-        quotation = message.text
-        quotation_author = ''
-        lines_with_quotation = search_qoutation(quotation, file_name)
-        if len(lines_with_quotation) == 0:
-            bot.send_message(message.chat.id, 'Цитата не найдена, дополните или исправите цитату')
-        for line in lines_with_quotation:
-            potential_authors = []
-            result_author, result_direct = search_directspeech(line)
-            for sentence in range(len(result_direct)):
-                if result_direct[sentence].find(quotation) != -1:
-                    quotation_author = result_author[sentence]
-            capitalize_list = capitalize_words(keep_alpha(quotation_author))
-            potential_authors =filter_lower_words(capitalize_list, lower_words)
-            bot.send_message(message.chat.id, line)
-            if len(potential_authors) != 0:
-                bot.send_message(message.chat.id, potential_authors[0])
+        try:
+            if message.text.lower() == "да":
+                bot.send_sticker(message.chat.id, 'CAACAgIAAxkBAAEBVkRfYOL4e95nsf0BQTNERFzXlRPXCQAC6AIAArVx2gZSDa62VYCCWxsE')
+                bot.send_message(message.chat.id, 'Я рад, что смог Вам помочь. Есть ли еще цитаты для меня?')
+
             else:
-                while len(potential_authors) == 0:
-                    previous_paragraph = list(open(file_name, encoding="utf-8"))[list(open(file_name, encoding="utf-8")).index(line) - 1]
-                    previous_capitalize_list = capitalize_words(keep_alpha(previous_paragraph))
-                    potential_authors = filter_lower_words(previous_capitalize_list, lower_words)
-                bot.send_message(message.chat.id, potential_authors[- 1])
-        bot.send_message(message.chat.id, 'Есть ли еще цитаты для меня?')
+                text = open("downloaded_books/" + file_name, encoding="utf-8").read()
+                keep_alpha_line, offset_list = get_offset(text)
+                lower_words = {word for word in keep_alpha_line.split() if word.islower()}
+                quotation = message.text
+                quotation_author = ''
+                lines_with_quotation = search_qoutation(quotation, file_name)
+                if len(lines_with_quotation) == 0:
+                    bot.send_message(message.chat.id, 'Цитата не найдена, дополните или исправите цитату')
+                else:
+                    bot.send_message(message.chat.id, 'Вот возможные абзацы с этой цитатой и ее авторы:')
+                    for line in lines_with_quotation:
+                        potential_authors = []
+                        result_author, result_direct = search_directspeech(line)
+                        for sentence in range(len(result_direct)):
+                            if result_direct[sentence].find(quotation) != -1:
+                                quotation_author = result_author[sentence]
+                        capitalize_list = capitalize_words(keep_alpha(quotation_author))
+                        potential_authors = filter_lower_words(capitalize_list, lower_words)
+                        bot.send_message(message.chat.id, line)
+                        if len(potential_authors) != 0:
+                            bot.send_message(message.chat.id, potential_authors[0])
+                        else:
+                            while len(potential_authors) == 0:
+                                previous_paragraph = list(open("downloaded_books/" + file_name, encoding="utf-8"))[
+                                    list(open(file_name, encoding="utf-8")).index(line) - 1]
+                                previous_capitalize_list = capitalize_words(keep_alpha(previous_paragraph))
+                                potential_authors = filter_lower_words(previous_capitalize_list, lower_words)
+                            bot.send_message(message.chat.id, potential_authors[- 1])
+                    bot.send_message(message.chat.id, 'Нашли ли Вы ответ на свой вопрос?(Да/Нет)')
+
+        except:
+            bot.send_message(message.chat.id, 'У меня нет этой книги, пришлите пожалуйста файл с ней.')
     elif state == 'character':
         text = open('example.txt', encoding="utf-8").read()
 
-state = ''
-character = ''
-
 def test():
     file_name = 'example.txt'
-    text = open(file_name, encoding="utf-8").read()
+    text = open("downloaded_books/" + file_name, encoding="utf-8").read()
     lower_words = {word for word in keep_alpha(text).split() if word.islower()}
     quotation = 'В будущую жизнь?'
     quotation_author = ''
@@ -155,6 +164,6 @@ def test():
             continue
 
 if __name__ == '__main__':
-    #bot.polling()
+    bot.polling()
     print(get_offset('— Ну,   хорошо'))
 
