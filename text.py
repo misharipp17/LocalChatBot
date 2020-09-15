@@ -56,8 +56,10 @@ def capitalize_words(line):
 def search_qoutation(quotation, file_name):
     """Получает цитату и файл с книжкой, возвращает список абзацев с данной цитатой."""
     paragraph = []
-    for line in open("downloaded_books/" + file_name, encoding="utf-8"):
-        number_quotation = line.lower().find(str(quotation).lower())
-        if number_quotation != -1:
-            paragraph.append(line)
+    with open('downloaded_books/' + file_name, encoding="utf-8") as f:
+        for line in f:
+            number_quotation = line.lower().find(str(quotation).lower())
+            if number_quotation != -1:
+                paragraph.append(line)
     return paragraph
+
