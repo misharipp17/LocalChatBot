@@ -1,8 +1,4 @@
-from text import get_offset, search_directspeech, filter_lower_words, keep_alpha, capitalize_words, search_qoutation
-from bot import bot
-
 import telebot
-from text import get_offset, search_directspeech, filter_lower_words, keep_alpha, capitalize_words, search_qoutation
 
 
 token = open('token.txt').read()
@@ -40,7 +36,7 @@ def handle_text_doc(message):
 @bot.message_handler(content_types=['text'])
 def send_text(message):
     if message.text.lower() == 'привет':
-        bot.send_message(message.chat.id, 'Привет! Напиши мне /start, чтобы узнать, что я умею.')
+        bot.send_message(message.chat.id, 'Привет! Как я могу Вам помочь?')
     elif message.text.lower() == 'пока':
         bot.send_message(message.chat.id, 'Пока, хорошего дня!')
     elif state == 'quotation':
@@ -50,9 +46,6 @@ def send_text(message):
                 bot.send_sticker(message.chat.id, 'CAACAgIAAxkBAAEBVkRfYOL4e95nsf0BQTNERFzXlRPXCQAC6AIAArVx2gZSDa62VYCCWxsE')
                 bot.send_message(message.chat.id, 'Я рад, что смог Вам помочь. Есть ли еще цитаты для меня?')
 
-            elif message.text.lower() == "нет":
-                bot.send_sticker(message.chat.id, 'CAACAgIAAxkBAAEBVktfYPUL4o_PjERkI5qn7OAbxX48mQACGgADWbv8JTxSipCGVVnTGwQ')
-                bot.send_message(message.chat.id, 'Попробуйте исправить цитату или прислать мне книжку')
             else:
                 text = open("downloaded_books/" + file_name, encoding="utf-8").read()
                 keep_alpha_line, offset_list = get_offset(text)
@@ -88,29 +81,4 @@ def send_text(message):
             bot.send_message(message.chat.id, 'У меня нет этой книги, пришлите пожалуйста файл с ней.')
     elif state == 'character':
         text = open('example.txt', encoding="utf-8").read()
-state = ''
-def test():
-    file_name = 'example.txt'
-    text = open("downloaded_books/" + file_name, encoding="utf-8").read()
-    lower_words = {word for word in keep_alpha(text).split() if word.islower()}
-    quotation = 'В будущую жизнь?'
-    quotation_author = ''
-    print(search_qoutation(quotation, file_name))
-    lines_with_quotation = search_qoutation(quotation, file_name)
-    for line in lines_with_quotation:
-        potential_authors = []
-        result_author, result_direct = search_directspeech(line)
-        for sentence in range(len(result_direct)):
-            if result_direct[sentence].find(quotation) != -1:
-                quotation_author = result_author[sentence]
-        capitalize_list = capitalize_words(keep_alpha(quotation_author))
-        potential_authors = filter_lower_words(capitalize_list, lower_words)
-        try:
-            print(potential_authors)
-        except:
-            continue
-
-if __name__ == '__main__':
-    bot.polling()
-    #print(get_offset('— Ну,   хорошо'))
 
