@@ -1,8 +1,5 @@
-from text import get_offset, search_directspeech, filter_lower_words, keep_alpha, capitalize_words, search_qoutation
-from bot import bot
-
 import telebot
-from text import get_offset, search_directspeech, filter_lower_words, keep_alpha, capitalize_words, search_qoutation
+from text import get_offset, search_directspeech, filter_lower_words, keep_alpha, capitalize_words, search_qoutation, find_with_offset
 
 
 token = open('token.txt').read()
@@ -61,15 +58,39 @@ def send_text(message):
                 quotation_author = ''
                 lines_with_quotation = search_qoutation(quotation, file_name)
                 if len(lines_with_quotation) == 0:
-                    bot.send_message(message.chat.id, 'Цитата не найдена, дополните или исправите цитату')
+                    lines_with_quotation, punct_quotations = find_with_offset(quotation, file_name)
+                    if len(lines_with_quotation) == 0:
+                        bot.send_message(message.chat.id, 'Цитата не найдена, дополните или исправите цитату')
+                    else:
+                        bot.send_message(message.chat.id, 'Вот возможные абзацы с этой цитатой и ее авторы:')
+                        for k in range(len(lines_with_quotation)):
+                            quotation = punct_quotations[k]
+                            potential_authors = []
+                            result_author, result_direct = search_directspeech(lines_with_quotation[k])
+                            for i in range(len(result_direct)):
+                                if result_direct[i].find(quotation) != -1:
+                                    quotation_author = result_author[i]
+                            capitalize_list = capitalize_words(keep_alpha(quotation_author))
+                            potential_authors = filter_lower_words(capitalize_list, lower_words)
+                            bot.send_message(message.chat.id, lines_with_quotation[k])
+                            if len(potential_authors) != 0:
+                                bot.send_message(message.chat.id, potential_authors[0])
+                            else:
+                                while len(potential_authors) == 0:
+                                    previous_paragraph = list(open("downloaded_books/" + file_name, encoding="utf-8"))[
+                                        list(open(file_name, encoding="utf-8")).index(line) - 1]
+                                    previous_capitalize_list = capitalize_words(keep_alpha(previous_paragraph))
+                                    potential_authors = filter_lower_words(previous_capitalize_list, lower_words)
+                                bot.send_message(message.chat.id, potential_authors[- 1])
+                        bot.send_message(message.chat.id, 'Нашли ли Вы ответ на свой вопрос?(Да/Нет)')
                 else:
                     bot.send_message(message.chat.id, 'Вот возможные абзацы с этой цитатой и ее авторы:')
                     for line in lines_with_quotation:
                         potential_authors = []
                         result_author, result_direct = search_directspeech(line)
-                        for sentence in range(len(result_direct)):
-                            if result_direct[sentence].find(quotation) != -1:
-                                quotation_author = result_author[sentence]
+                        for i in range(len(result_direct)):
+                            if result_direct[i].find(quotation) != -1:
+                                quotation_author = result_author[i]
                         capitalize_list = capitalize_words(keep_alpha(quotation_author))
                         potential_authors = filter_lower_words(capitalize_list, lower_words)
                         bot.send_message(message.chat.id, line)
