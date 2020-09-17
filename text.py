@@ -1,6 +1,20 @@
 import re
 
-
+def find_with_offset(quotation, file_name):
+    text = open("downloaded_books/" + file_name, encoding="utf-8")
+    lines_with_quotation = []
+    punct_quotations = []
+    for line in text:
+        clear_example, offset = get_offset(line)
+        clear_quotation = keep_alpha(quotation)
+        if clear_example.find(clear_quotation) != -1:
+            clear_begin = clear_example.find(clear_quotation)
+            clear_end = clear_begin + len(clear_quotation) - 1
+            quotation = line[clear_begin + offset[clear_begin]:clear_end + offset[clear_end] + 1]
+            if quotation not in punct_quotations:
+                punct_quotations.append(quotation)
+            lines_with_quotation.append(line)
+    return lines_with_quotation, punct_quotations
 def get_offset(text):
     """Возвращает список смещений, которые возникают из-за удаления из строки знаков пунктуации, для каждого символа и саму строку только из букв и одинарных пробелов.
     get_offset('— Ну,   хорошо') -> ' Ну хорошо', [1, 1, 1, 2, 4, 4, 4, 4, 4, 4]"""
