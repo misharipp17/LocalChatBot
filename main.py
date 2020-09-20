@@ -42,11 +42,10 @@ def send_text(message):
         bot.send_message(message.chat.id, 'Пока, хорошего дня!')
     elif state == 'quotation':
         file_name = 'example.txt'
-        try:
+        if True:
             if message.text.lower() == "да":
                 bot.send_sticker(message.chat.id, 'CAACAgIAAxkBAAEBVkRfYOL4e95nsf0BQTNERFzXlRPXCQAC6AIAArVx2gZSDa62VYCCWxsE')
                 bot.send_message(message.chat.id, 'Я рад, что смог Вам помочь. Есть ли еще цитаты для меня?')
-
             elif message.text.lower() == "нет":
                 bot.send_sticker(message.chat.id, 'CAACAgIAAxkBAAEBVktfYPUL4o_PjERkI5qn7OAbxX48mQACGgADWbv8JTxSipCGVVnTGwQ')
                 bot.send_message(message.chat.id, 'Попробуйте исправить цитату или прислать мне книжку')
@@ -77,8 +76,7 @@ def send_text(message):
                                 bot.send_message(message.chat.id, potential_authors[0])
                             else:
                                 while len(potential_authors) == 0:
-                                    previous_paragraph = list(open("downloaded_books/" + file_name, encoding="utf-8"))[
-                                        list(open(file_name, encoding="utf-8")).index(line) - 1]
+                                    previous_paragraph = list(open("downloaded_books/" + file_name, encoding="utf-8"))[k - 1]
                                     previous_capitalize_list = capitalize_words(keep_alpha(previous_paragraph))
                                     potential_authors = filter_lower_words(previous_capitalize_list, lower_words)
                                 bot.send_message(message.chat.id, potential_authors[- 1])
@@ -104,9 +102,8 @@ def send_text(message):
                                 potential_authors = filter_lower_words(previous_capitalize_list, lower_words)
                             bot.send_message(message.chat.id, potential_authors[- 1])
                     bot.send_message(message.chat.id, 'Нашли ли Вы ответ на свой вопрос?(Да/Нет)')
-
-        except:
-            bot.send_message(message.chat.id, 'У меня нет этой книги, пришлите пожалуйста файл с ней.')
+        #except:
+            #bot.send_message(message.chat.id, 'У меня нет этой книги, пришлите пожалуйста файл с ней.')
     elif state == 'character':
         text = open('example.txt', encoding="utf-8").read()
 state = ''
