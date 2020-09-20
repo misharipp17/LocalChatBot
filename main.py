@@ -97,7 +97,7 @@ def send_text(message):
                         else:
                             while len(potential_authors) == 0:
                                 previous_paragraph = list(open("downloaded_books/" + file_name, encoding="utf-8"))[
-                                    list(open(file_name, encoding="utf-8")).index(line) - 1]
+                                    list(open("downloaded_books/" + file_name, encoding="utf-8")).index(line) - 1]
                                 previous_capitalize_list = capitalize_words(keep_alpha(previous_paragraph))
                                 potential_authors = filter_lower_words(previous_capitalize_list, lower_words)
                             bot.send_message(message.chat.id, potential_authors[- 1])
