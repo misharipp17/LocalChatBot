@@ -26,14 +26,14 @@ bot = telebot.TeleBot(token)
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
-    bot.send_message(message.chat.id, 'Привет, ты написал мне /start \n Вот какие команды я могу исполнять: \n /quotation - найти имя персонажа и главу в книге по введенной Вами цитате. \n /character - выделить как можно больше цитат персонажа в заданной главе.\n /searchbook - вывожу список книг в моей базе данных, прохождение этой команды необходимо для использования остальных команд.')
+    bot.send_message(message.chat.id, 'РџСЂРёРІРµС‚, С‚С‹ РЅР°РїРёСЃР°Р» РјРЅРµ /start \n Р’РѕС‚ РєР°РєРёРµ РєРѕРјР°РЅРґС‹ СЏ РјРѕРіСѓ РёСЃРїРѕР»РЅСЏС‚СЊ: \n /quotation - РЅР°Р№С‚Рё РёРјСЏ РїРµСЂСЃРѕРЅР°Р¶Р° Рё РіР»Р°РІСѓ РІ РєРЅРёРіРµ РїРѕ РІРІРµРґРµРЅРЅРѕР№ Р’Р°РјРё С†РёС‚Р°С‚Рµ. \n /character - РІС‹РґРµР»РёС‚СЊ РєР°Рє РјРѕР¶РЅРѕ Р±РѕР»СЊС€Рµ С†РёС‚Р°С‚ РїРµСЂСЃРѕРЅР°Р¶Р° РІ Р·Р°РґР°РЅРЅРѕР№ РіР»Р°РІРµ.\n /searchbook - РІС‹РІРѕР¶Сѓ СЃРїРёСЃРѕРє РєРЅРёРі РІ РјРѕРµР№ Р±Р°Р·Рµ РґР°РЅРЅС‹С…, РїСЂРѕС…РѕР¶РґРµРЅРёРµ СЌС‚РѕР№ РєРѕРјР°РЅРґС‹ РЅРµРѕР±С…РѕРґРёРјРѕ РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РѕСЃС‚Р°Р»СЊРЅС‹С… РєРѕРјР°РЅРґ.')
 
 @bot.message_handler(commands=['quotation'])
 def start_quotation(message):
     global state
     state = 'searchbook'
-    bot.send_message(message.chat.id, 'Вот какие авторы у меня есть:')
-    bot.send_message(message.chat.id, 'Есть ли среди них нужный Вам автор?(Да/Нет)')
+    bot.send_message(message.chat.id, 'Р’РѕС‚ РєР°РєРёРµ Р°РІС‚РѕСЂС‹ Сѓ РјРµРЅСЏ РµСЃС‚СЊ:')
+    bot.send_message(message.chat.id, 'Р•СЃС‚СЊ Р»Рё СЃСЂРµРґРё РЅРёС… РЅСѓР¶РЅС‹Р№ Р’Р°Рј Р°РІС‚РѕСЂ?(Р”Р°/РќРµС‚)')
     for row in rows1:
         bot.send_message(message.chat.id, row[1] + ' ' + row[2] + ' ' + row[3])
 
@@ -42,14 +42,14 @@ def start_quotation(message):
 def start_quotation(message):
     global state
     state = 'quotation'
-    bot.send_message(message.chat.id, 'Напишите Вашу цитату.')
+    bot.send_message(message.chat.id, 'РќР°РїРёС€РёС‚Рµ Р’Р°С€Сѓ С†РёС‚Р°С‚Сѓ.')
     for row in rows1:
         bot.send_message(message.chat.id, row[1] + ' ' + row[2] + ' ' + row[3])
 @bot.message_handler(commands=['character'])
 def start_character(message):
     global state
     state = 'character'
-    bot.send_message(message.chat.id, 'Напишите персонажа, и главу, и ,возможно, название книги.')
+    bot.send_message(message.chat.id, 'РќР°РїРёС€РёС‚Рµ РїРµСЂСЃРѕРЅР°Р¶Р°, Рё РіР»Р°РІСѓ, Рё ,РІРѕР·РјРѕР¶РЅРѕ, РЅР°Р·РІР°РЅРёРµ РєРЅРёРіРё.')
 
 @bot.message_handler(content_types=['document'])
 def handle_text_doc(message):
@@ -61,34 +61,34 @@ def handle_text_doc(message):
         file_name = message.document.file_name
         with open('downloaded_books/' + file_name, 'wb') as new_file:
             new_file.write(downloaded_file)
-        bot.send_message(message.chat.id, 'Я загрузил вашу книгу, можете пользоваться остальными моими командами)')
+        bot.send_message(message.chat.id, 'РЇ Р·Р°РіСЂСѓР·РёР» РІР°С€Сѓ РєРЅРёРіСѓ, РјРѕР¶РµС‚Рµ РїРѕР»СЊР·РѕРІР°С‚СЊСЃСЏ РѕСЃС‚Р°Р»СЊРЅС‹РјРё РјРѕРёРјРё РєРѕРјР°РЅРґР°РјРё)')
     else:
-        bot.send_message(message.chat.id, 'Извините, но Вы прислали это не вовремя.')
+        bot.send_message(message.chat.id, 'РР·РІРёРЅРёС‚Рµ, РЅРѕ Р’С‹ РїСЂРёСЃР»Р°Р»Рё СЌС‚Рѕ РЅРµ РІРѕРІСЂРµРјСЏ.')
 
 @bot.message_handler(content_types=['text'])
 def send_text(message):
     global state
-    if message.text.lower() == 'привет':
-        bot.send_message(message.chat.id, 'Привет! Напиши мне /start, чтобы узнать, что я умею.')
-    elif message.text.lower() == 'пока':
-        bot.send_message(message.chat.id, 'Пока, хорошего дня!')
+    if message.text.lower() == 'РїСЂРёРІРµС‚':
+        bot.send_message(message.chat.id, 'РџСЂРёРІРµС‚! РќР°РїРёС€Рё РјРЅРµ /start, С‡С‚РѕР±С‹ СѓР·РЅР°С‚СЊ, С‡С‚Рѕ СЏ СѓРјРµСЋ.')
+    elif message.text.lower() == 'РїРѕРєР°':
+        bot.send_message(message.chat.id, 'РџРѕРєР°, С…РѕСЂРѕС€РµРіРѕ РґРЅСЏ!')
     elif state == 'searchbook':
-        if message.text.lower() == "да":
-            bot.send_message(message.chat.id, 'Напишите его Имя/Фамилию/Отчество так как оно записано в сообщении выше.')
-        elif message.text.lower() == "нет":
-            bot.send_message(message.chat.id, 'Напишите его Имя/Фамилию/Отчество и следуюущим сообщением пришлите файл с нужной Вам книгой.')
+        if message.text.lower() == "РґР°":
+            bot.send_message(message.chat.id, 'РќР°РїРёС€РёС‚Рµ РµРіРѕ РРјСЏ/Р¤Р°РјРёР»РёСЋ/РћС‚С‡РµСЃС‚РІРѕ С‚Р°Рє РєР°Рє РѕРЅРѕ Р·Р°РїРёСЃР°РЅРѕ РІ СЃРѕРѕР±С‰РµРЅРёРё РІС‹С€Рµ.')
+        elif message.text.lower() == "РЅРµС‚":
+            bot.send_message(message.chat.id, 'РќР°РїРёС€РёС‚Рµ РµРіРѕ РРјСЏ/Р¤Р°РјРёР»РёСЋ/РћС‚С‡РµСЃС‚РІРѕ Рё СЃР»РµРґСѓСЋСѓС‰РёРј СЃРѕРѕР±С‰РµРЅРёРµРј РїСЂРёС€Р»РёС‚Рµ С„Р°Р№Р» СЃ РЅСѓР¶РЅРѕР№ Р’Р°Рј РєРЅРёРіРѕР№.')
             state = 'author'
     elif state == 'author':
         author = message.text.lower.split()
         cur.execute("INSERT INTO STUDENT (name, surname, middlename) VALUES (%(author[0]), %(author[1]), %(author[2]))", author)
     elif state == 'quotation':
         if True:
-            if message.text.lower() == "да":
+            if message.text.lower() == "РґР°":
                 bot.send_sticker(message.chat.id, 'CAACAgIAAxkBAAEBVkRfYOL4e95nsf0BQTNERFzXlRPXCQAC6AIAArVx2gZSDa62VYCCWxsE')
-                bot.send_message(message.chat.id, 'Я рад, что смог Вам помочь. Есть ли еще цитаты для меня?')
-            elif message.text.lower() == "нет":
+                bot.send_message(message.chat.id, 'РЇ СЂР°Рґ, С‡С‚Рѕ СЃРјРѕРі Р’Р°Рј РїРѕРјРѕС‡СЊ. Р•СЃС‚СЊ Р»Рё РµС‰Рµ С†РёС‚Р°С‚С‹ РґР»СЏ РјРµРЅСЏ?')
+            elif message.text.lower() == "РЅРµС‚":
                 bot.send_sticker(message.chat.id, 'CAACAgIAAxkBAAEBVktfYPUL4o_PjERkI5qn7OAbxX48mQACGgADWbv8JTxSipCGVVnTGwQ')
-                bot.send_message(message.chat.id, 'Попробуйте исправить цитату или прислать мне книжку')
+                bot.send_message(message.chat.id, 'РџРѕРїСЂРѕР±СѓР№С‚Рµ РёСЃРїСЂР°РІРёС‚СЊ С†РёС‚Р°С‚Сѓ РёР»Рё РїСЂРёСЃР»Р°С‚СЊ РјРЅРµ РєРЅРёР¶РєСѓ')
             else:
                 text = open("downloaded_books/" + file_name, encoding="utf-8").read()
                 keep_alpha_line, offset_list = get_offset(text)
@@ -99,9 +99,9 @@ def send_text(message):
                 if len(lines_with_quotation) == 0:
                     lines_with_quotation, punct_quotations = find_with_offset(quotation, file_name)
                     if len(lines_with_quotation) == 0:
-                        bot.send_message(message.chat.id, 'Цитата не найдена, дополните или исправите цитату')
+                        bot.send_message(message.chat.id, 'Р¦РёС‚Р°С‚Р° РЅРµ РЅР°Р№РґРµРЅР°, РґРѕРїРѕР»РЅРёС‚Рµ РёР»Рё РёСЃРїСЂР°РІРёС‚Рµ С†РёС‚Р°С‚Сѓ')
                     else:
-                        bot.send_message(message.chat.id, 'Вот возможные абзацы с этой цитатой и ее авторы:')
+                        bot.send_message(message.chat.id, 'Р’РѕС‚ РІРѕР·РјРѕР¶РЅС‹Рµ Р°Р±Р·Р°С†С‹ СЃ СЌС‚РѕР№ С†РёС‚Р°С‚РѕР№ Рё РµРµ Р°РІС‚РѕСЂС‹:')
                         for k in range(len(lines_with_quotation)):
                             quotation = punct_quotations[k]
                             potential_authors = []
@@ -120,9 +120,9 @@ def send_text(message):
                                     previous_capitalize_list = capitalize_words(keep_alpha(previous_paragraph))
                                     potential_authors = filter_lower_words(previous_capitalize_list, lower_words)
                                 bot.send_message(message.chat.id, potential_authors[- 1])
-                        bot.send_message(message.chat.id, 'Нашли ли Вы ответ на свой вопрос?(Да/Нет)')
+                        bot.send_message(message.chat.id, 'РќР°С€Р»Рё Р»Рё Р’С‹ РѕС‚РІРµС‚ РЅР° СЃРІРѕР№ РІРѕРїСЂРѕСЃ?(Р”Р°/РќРµС‚)')
                 else:
-                    bot.send_message(message.chat.id, 'Вот возможные абзацы с этой цитатой и ее авторы:')
+                    bot.send_message(message.chat.id, 'Р’РѕС‚ РІРѕР·РјРѕР¶РЅС‹Рµ Р°Р±Р·Р°С†С‹ СЃ СЌС‚РѕР№ С†РёС‚Р°С‚РѕР№ Рё РµРµ Р°РІС‚РѕСЂС‹:')
                     for line in lines_with_quotation:
                         potential_authors = []
                         result_author, result_direct = search_directspeech(line)
@@ -141,7 +141,7 @@ def send_text(message):
                                 previous_capitalize_list = capitalize_words(keep_alpha(previous_paragraph))
                                 potential_authors = filter_lower_words(previous_capitalize_list, lower_words)
                             bot.send_message(message.chat.id, potential_authors[- 1])
-                    bot.send_message(message.chat.id, 'Нашли ли Вы ответ на свой вопрос?(Да/Нет)')
+                    bot.send_message(message.chat.id, 'РќР°С€Р»Рё Р»Рё Р’С‹ РѕС‚РІРµС‚ РЅР° СЃРІРѕР№ РІРѕРїСЂРѕСЃ?(Р”Р°/РќРµС‚)')
     elif state == 'character':
         text = open('example.txt', encoding="utf-8").read()
 state = ''
@@ -150,7 +150,7 @@ def test():
     file_name = 'example.txt'
     text = open("downloaded_books/" + file_name, encoding="utf-8").read()
     lower_words = {word for word in keep_alpha(text).split() if word.islower()}
-    quotation = 'В будущую жизнь?'
+    quotation = 'Р’ Р±СѓРґСѓС‰СѓСЋ Р¶РёР·РЅСЊ?'
     quotation_author = ''
     print(search_qoutation(quotation, file_name))
     lines_with_quotation = search_qoutation(quotation, file_name)
@@ -169,5 +169,5 @@ def test():
 
 if __name__ == '__main__':
     bot.polling()
-    #print(get_offset('— Ну,   хорошо'))
+    #print(get_offset('вЂ” РќСѓ,   С…РѕСЂРѕС€Рѕ'))
 
