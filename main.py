@@ -9,18 +9,13 @@ con = psycopg2.connect(
     host="127.0.0.1",
     port="5432"
 )
-con1 = psycopg2.connect(
-    database="authors",
-    user="chatbot",
-    password="mrvl",
-    host="127.0.0.1",
-    port="5432"
-)
-cur1 = con1.cursor()
+cur1 = con.cursor()
 cur = con.cursor()
+cur.execute("SELECT * from authors")
+cur1.execute("SELECT * from books")
 rows = cur.fetchall()
 rows1 = cur1.fetchall()
-print("Yes")
+print(rows, rows1)
 token = open('token.txt').read()
 bot = telebot.TeleBot(token)
 
@@ -67,6 +62,7 @@ def handle_text_doc(message):
 
 @bot.message_handler(content_types=['text'])
 def send_text(message):
+    file_name = 'example.txt'
     global state
     if message.text.lower() == 'привет':
         bot.send_message(message.chat.id, 'Привет! Напиши мне /start, чтобы узнать, что я умею.')
@@ -80,7 +76,7 @@ def send_text(message):
             state = 'author'
     elif state == 'author':
         author = message.text.lower.split()
-        cur.execute("INSERT INTO STUDENT (name, surname, middlename) VALUES (%(author[0]), %(author[1]), %(author[2]))", author)
+        cur.execute("INSERT INTO authors (name, surname, middlename) VALUES (%(author[0]), %(author[1]), %(author[2]))", author)
     elif state == 'quotation':
         if True:
             if message.text.lower() == "да":
