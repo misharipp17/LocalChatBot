@@ -23,7 +23,7 @@ bot = telebot.TeleBot(token)
 def start_message(message):
     bot.send_message(message.chat.id, 'Привет, ты написал мне /start \n Вот какие команды я могу исполнять: \n /quotation - найти имя персонажа и главу в книге по введенной Вами цитате. \n /character - выделить как можно больше цитат персонажа в заданной главе.\n /searchbook - вывожу список книг в моей базе данных, прохождение этой команды необходимо для использования остальных команд.')
 
-@bot.message_handler(commands=['quotation'])
+@bot.message_handler(commands=['searchbook'])
 def start_quotation(message):
     global state
     state = 'searchbook'
