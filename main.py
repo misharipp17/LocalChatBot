@@ -77,7 +77,7 @@ def send_text(message):
     elif state == 'author':
         phio = message.text.lower().split()
         author = ({'name': phio[0].capitalize(), 'middlename': phio[1].capitalize(), 'surname': phio[2].capitalize()})
-        cur.execute("INSERT INTO authors (name, surname, middlename) VALUES (0, 0, 0)")
+        cur.execute("INSERT INTO authors (id, name, surname, middlename) VALUES (2, 0, 0, 0)")
     elif state == 'quotation':
         if True:
             if message.text.lower() == "да":
