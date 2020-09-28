@@ -75,8 +75,9 @@ def send_text(message):
             bot.send_message(message.chat.id, 'Напишите его Имя/Фамилию/Отчество и следуюущим сообщением пришлите файл с нужной Вам книгой.')
             state = 'author'
     elif state == 'author':
-        author = message.text.lower().split()
-        cur.execute("INSERT INTO authors (name, surname, middlename) VALUES (%(author[0]), %(author[1]), %(author[2]))", author)
+        phio = message.text.lower().split()
+        author = ({'name': phio[0].capitalize(), 'middlename': phio[1].capitalize(), 'surname': phio[2].capitalize()})
+        cur.execute("INSERT INTO authors (name, surname, middlename) VALUES (%(name), %(middlename), %(surname))", author)
     elif state == 'quotation':
         if True:
             if message.text.lower() == "да":
