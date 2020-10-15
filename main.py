@@ -9,6 +9,7 @@ con = psycopg2.connect(
     host="127.0.0.1",
     port="5432"
 )
+print('success')
 cur1 = con.cursor()
 cur = con.cursor()
 cur.execute("SELECT * from authors")
@@ -28,9 +29,9 @@ def start_quotation(message):
     global state
     state = 'searchbook'
     bot.send_message(message.chat.id, 'Вот какие авторы у меня есть:')
-    bot.send_message(message.chat.id, 'Есть ли среди них нужный Вам автор?(Да/Нет)')
     for row in rows1:
         bot.send_message(message.chat.id, row[1] + ' ' + row[2] + ' ' + row[3])
+    bot.send_message(message.chat.id, 'Есть ли среди них нужный Вам автор?(Да/Нет)')
 
 
 @bot.message_handler(commands=['quotation'])
@@ -77,7 +78,7 @@ def send_text(message):
     elif state == 'author':
         phio = message.text.lower().split()
         author = ({'name': phio[0].capitalize(), 'middlename': phio[1].capitalize(), 'surname': phio[2].capitalize()})
-        cur.execute("INSERT INTO authors (id, name, middlename, surname) VALUES (2, '0', '0', '0')")
+        cur.execute("INSERT INTO authors (id, name, middlename, surname) VALUES ('0', '0', '0')")
         print('Yes')
     elif state == 'quotation':
         if True:
