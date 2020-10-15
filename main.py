@@ -11,7 +11,7 @@ con = psycopg2.connect(
 )
 print('success')
 cur = con.cursor()
-cur.execute("INSERT INTO authors (name, middlename, surname) VALUES ('0', '0', '0')")
+cur.execute("INSERT INTO authors (name, middlename, surname) VALUES ('0', '0', '0');")
 #cur = con.cursor()
 #cur.execute("SELECT * from authors")
 #cur1.execute("SELECT * from books")
