@@ -29,8 +29,8 @@ def start_quotation(message):
     global state
     state = 'searchbook'
     bot.send_message(message.chat.id, 'Вот какие авторы у меня есть:')
-    for row in rows1:
-        bot.send_message(message.chat.id, row[1] + ' ' + row[2] + ' ' + row[3])
+    #for row in rows1:
+        #bot.send_message(message.chat.id, row[1] + ' ' + row[2] + ' ' + row[3])
     bot.send_message(message.chat.id, 'Есть ли среди них нужный Вам автор?(Да/Нет)')
 
 
