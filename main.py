@@ -10,13 +10,13 @@ con = psycopg2.connect(
     port="5432"
 )
 print('success')
-cur1 = con.cursor()
-cur = con.cursor()
-cur.execute("SELECT * from authors")
-cur1.execute("SELECT * from books")
-rows = cur.fetchall()
-rows1 = cur1.fetchall()
-print(rows, rows1)
+
+#cur = con.cursor()
+#cur.execute("SELECT * from authors")
+#cur1.execute("SELECT * from books")
+#rows = cur.fetchall()
+#rows1 = cur1.fetchall()
+#print(rows, rows1)
 token = open('token.txt').read()
 bot = telebot.TeleBot(token)
 
@@ -78,6 +78,7 @@ def send_text(message):
     elif state == 'author':
         phio = message.text.lower().split()
         author = ({'name': phio[0].capitalize(), 'middlename': phio[1].capitalize(), 'surname': phio[2].capitalize()})
+        cur = con.cursor()
         cur.execute("INSERT INTO authors (name, middlename, surname) VALUES ('0', '0', '0')")
         print('Yes')
     elif state == 'quotation':
